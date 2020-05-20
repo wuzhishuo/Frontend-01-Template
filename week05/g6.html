@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g6-3.4.9/dist/g6.min.js"></script>
+  </head>
+  <body>
+      <div id="mountNode"></div>
+    <script>
+      var set = new Set();
+      var objects = [
+        eval,
+        isFinite,
+        isNaN,
+        parseFloat,
+        parseInt,
+        decodeURI,
+        decodeURIComponent,
+        encodeURI,
+        encodeURIComponent,
+        Array,
+        Date,
+        RegExp,
+        Promise,
+        Proxy,
+        Map,
+        WeakMap,
+        Set,
+        WeakSet,
+        Function,
+        Boolean,
+        String,
+        Number,
+        Symbol,
+        Object,
+        Error,
+        EvalError,
+        RangeError,
+        ReferenceError,
+        SyntaxError,
+        TypeError,
+        URIError,
+        ArrayBuffer,
+        SharedArrayBuffer,
+        DataView,
+        Float32Array,
+        Float64Array,
+        Int8Array,
+        Int16Array,
+        Int32Array,
+        Uint8Array,
+        Uint16Array,
+        Uint32Array,
+        Uint8ClampedArray,
+        Atomics,
+        JSON,
+        Math,
+        Reflect
+      ];
+
+      objects.forEach(o => set.add(o));
+
+      let nodes = [];
+      let edges = [];
+      let nodeId = 0;
+
+      for (var i = 0; i < objects.length; i++) {
+        searchObject(objects[i]);
+      }
+
+      function searchObject(object) {
+        const sourceNodeId = getNodeId();
+        nodes.push({
+          id: sourceNodeId,
+          label: object.name
+        });
+
+        for (var p of Object.getOwnPropertyNames(object)) {
+          var d = Object.getOwnPropertyDescriptor(object, p);
+          const targetNodeId = getNodeId();
+
+          if (
+            (d.value !== null && typeof d.value === 'object')
+          ) {
+            if (!set.has(d.value)) {
+              if (d.value.name) {
+                nodes.push({
+                  id: targetNodeId,
+                  label: d.value.name
+                });
+
+                // edges.push({
+                //   target: targetNodeId,
+                //   source: sourceNodeId
+                // });
+              }
+
+              if (d.value !== null && typeof d.value === 'object') {
+                searchObject(d.value);
+              }
+            }
+          }
+
+          
+        }
+      }
+
+      function getNodeId() {
+        nodeId += 1;
+        return `node-${nodeId}`;
+      }
+
+      const graph = new G6.Graph({
+        container: 'mountNode', // 指定图画布的容器 id，与第 9 行的容器对应
+        // 画布宽高
+        width: 1200,
+        height: 1000,
+        layout: {                // Object，可选，布局的方法及其配置项，默认为 random 布局。
+    preventOverlap: true,  // 防止节点重叠
+  }
+      });
+      graph.data({
+        nodes,
+        edges
+      });
+      // 渲染图
+      graph.render();
+    </script>
+  </body>
+</html>

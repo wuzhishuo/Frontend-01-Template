@@ -1,5 +1,5 @@
 const net = require('net');
-const parse = require('./parser');
+const parse = require('./html-parser');
 
 class Request {
   constructor(options) {
