@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      #board {
+        display: flex;
+        width: 306px;
+        flex-wrap: wrap;
+        flex-direction: row;
+      }
+      .cell {
+        display: inline-flex;
+        width: 100px;
+        height: 100px;
+        background: green;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="board"></div>
+    <script>
+      let pattern = [
+        [2, 0, 0],
+        [1, 0, 0],
+        [0, 0, 0]
+      ];
+      let color = 1;
+
+      function show() {
+        let board = document.getElementById('board');
+        board.innerHTML = '';
+
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            let cell = document.createElement('div');
+            cell.innerHTML =
+              pattern[i][j] == 2 ? '❌' : pattern[i][j] == 1 ? '⭕️' : '';
+            cell.classList.add('cell');
+            cell.addEventListener('click', () => move(j, i));
+            board.appendChild(cell);
+          }
+        }
+      }
+
+      function move(x, y) {
+        if (pattern[y][x] !== 0) {
+          return;
+        }
+
+        pattern[y][x] = color;
+        if (check(pattern, color)) {
+          alert(color == 1 ? '⭕️ is winner' : '❌ is winner');
+        }
+        show();
+
+        color = 3 - color;
+
+        if (willWin(pattern, color)) {
+          console.log(color == 1 ? '⭕️ will win' : '❌ will win');
+        }
+      }
+
+      function check(pattern, color) {
+        for (let i = 0; i < 3; i++) {
+          let win = true;
+          for (let j = 0; j < 3; j++) {
+            if (pattern[i][j] != color) {
+              win = false;
+              break;
+            }
+          }
+
+          if (win) {
+            return true;
+          }
+        }
+
+        for (let i = 0; i < 3; i++) {
+          let win = true;
+          for (let j = 0; j < 3; j++) {
+            if (pattern[j][i] != color) {
+              win = false;
+              break;
+            }
+          }
+
+          if (win) {
+            return true;
+          }
+        }
+
+        {
+          let win = true;
+          for (let i = 0; i < 3; i++) {
+            if (pattern[i][i] != color) {
+              win = false;
+              break;
+            }
+          }
+
+          if (win) {
+            return true;
+          }
+        }
+
+        {
+          let win = true;
+          for (let i = 0; i < 3; i++) {
+            if (pattern[i][2 - i] != color) {
+              win = false;
+              break;
+            }
+          }
+
+          if (win) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      function willWin(pattern, color) {
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (pattern[j][i] != 0) {
+              continue;
+            }
+            let temp = clone(pattern);
+            temp[i][j] = color;
+            if (check(temp, color)) {
+              return [j, i];
+            }
+          }
+        }
+      }
+
+      function bestChoice(pattern, color) {
+        let point = willWin(pattern, color);
+
+        if (point) {
+          return {
+            point,
+            result: 1
+          };
+        }
+
+        let result = -1;
+
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (pattern[j][i] != 0) {
+              continue;
+            }
+
+            let temp = clone(pattern);
+            temp[i][j] = 3 - color;
+            let opp = bestChoice(temp, color);
+
+            if (-opp.result >= result) {
+              point = [j, i];
+              result = -opp.result;
+            }
+          }
+        }
+
+        return {
+          point,
+          result
+        };
+      }
+
+      function clone(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      }
+
+      show();
+    </script>
+  </body>
+</html>
