@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>红绿灯</title>
+    <style>
+      .red,
+      .yellow,
+      .green {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 15px;
+        background-color: gray;
+      }
+
+      .light.red {
+        background-color: red;
+      }
+
+      .light.yellow {
+        background-color: yellow;
+      }
+
+      .light.green {
+        background-color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="red"></div>
+    <div class="yellow"></div>
+    <div class="green"></div>
+
+    <script>
+      function sleep(time) {
+        return new Promise(resolve => {
+          setTimeout(() => resolve(), time);
+        });
+      }
+
+      async function run() {
+        let $light = document.getElementById('light');
+        while (true) {
+          red();
+          await sleep(10 * 1000);
+          yellow();
+          await sleep(2 * 1000);
+          green();
+          await sleep(5 * 1000);
+        }
+      }
+
+      function red() {
+        let lights = document.getElementsByTagName('div');
+        for (let i = 0; i < lights.length; i++) {
+          const light = lights[i];
+          light.classList.remove('light');
+        }
+
+        document.getElementsByClassName('red')[0].classList.add('light');
+      }
+
+      function yellow() {
+        let lights = document.getElementsByTagName('div');
+        for (let i = 0; i < lights.length; i++) {
+          const light = lights[i];
+          light.classList.remove('light');
+        }
+
+        document.getElementsByClassName('yellow')[0].classList.add('light');
+      }
+
+      function green() {
+        let lights = document.getElementsByTagName('div');
+        for (let i = 0; i < lights.length; i++) {
+          const light = lights[i];
+          light.classList.remove('light');
+        }
+
+        document.getElementsByClassName('green')[0].classList.add('light');
+      }
+
+      run();
+    </script>
+  </body>
+</html>
