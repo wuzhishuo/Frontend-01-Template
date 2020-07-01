@@ -1,0 +1,162 @@
+<script>
+  var regexp = /([0-9\.]+)|([ ]+)|([\r\n]+)|(\+)|(\-)|(\*)|(\/)/g;
+  var dictionary = [
+    'Number',
+    'Whitespace',
+    'LineTerminator',
+    '+',
+    '-',
+    '*',
+    '-'
+  ];
+
+  let tokens = [];
+
+  for (const token of tokenize(' 5 + 2 * 10')) {
+    if (token.type !== 'Whitespace' && token.type !== 'LineTerminator') {
+      tokens.push(token);
+    }
+  }
+
+  console.log(Express(tokens));
+
+  function* tokenize(source) {
+    let lastIndex = 0;
+    let result = null;
+
+    while (true) {
+      lastIndex = regexp.lastIndex;
+      result = regexp.exec(source);
+
+      if (!result) {
+        break;
+      }
+
+      if (regexp.lastIndex - lastIndex > result[0].length) {
+        throw new Error(
+          'unexpected token "' +
+            source.slice(lastIndex, regexp.lastIndex - result[0].length) +
+            '"'
+        );
+      }
+
+      let token = {
+        type: null,
+        value: null
+      };
+
+      for (let i = 0; i < dictionary.length; i++) {
+        if (result[i + 1]) {
+          token.type = dictionary[i];
+        }
+      }
+      token.value = result[0];
+      yield token;
+    }
+    while (result);
+
+    yield { type: 'EOF' };
+  }
+
+  function Express(source) {
+    if (source[0].type === 'AdditiveExpress' && source[1].type === 'EOF') {
+      let node = {
+        type: 'Express',
+        children: [source.shift(), source.shift()]
+      };
+
+      source.unshift(node);
+      return node;
+    }
+
+    AdditiveExpress(source);
+
+    return Express(source);
+  }
+
+  function AdditiveExpress(source) {
+    if (source[0].type === 'Number') {
+      MultiplicationExpress(source);
+      return AdditiveExpress(source);
+    }
+
+    if (
+      source[0].type == 'MultiplicationExpress' &&
+      source.length > 1 &&
+      source[1].type === '+'
+    ) {
+      let node = {
+        type: 'AdditiveExpress',
+        children: [source.shift(), source.shift()]
+      };
+
+      MultiplicationExpress(source);
+      node.children.push(source.shift());
+      source.unshift(node);
+      return AdditiveExpress(source);
+    }
+
+    if (
+      source[0].type == 'MultiplicationExpress' &&
+      source.length > 1 &&
+      source[1].type === '-'
+    ) {
+      let node = {
+        type: 'AdditiveExpress',
+        children: [source.shift(), source.shift()]
+      };
+
+      MultiplicationExpress(source);
+      node.children.push(source.shift());
+      source.unshift(node);
+      return AdditiveExpress(source);
+    }
+
+    if (source[0].type === 'AdditiveExpress') {
+      return source[0];
+    }
+  }
+
+  function MultiplicationExpress(source) {
+    if (source[0].type == 'Number') {
+      let node = {
+        type: 'MultiplicationExpress',
+        children: source.shift()
+      };
+      source.unshift(node);
+      return MultiplicationExpress(source);
+    }
+
+    if (
+      source[0].type == 'MultiplicationExpress' &&
+      source.length > 1 &&
+      source[1].type === '*'
+    ) {
+      let node = {
+        type: 'MultiplicationExpress',
+        children: [source.shift(), source.shift(), source.shift()]
+      };
+      source.unshift(node);
+      return MultiplicationExpress(source);
+    }
+
+    if (
+      source[0].type == 'MultiplicationExpress' &&
+      source.length > 1 &&
+      source[1].type === '/'
+    ) {
+      let node = {
+        type: 'MultiplicationExpress',
+        children: [source.shift(), source.shift(), source.shift()]
+      };
+      source.unshift(node);
+      return MultiplicationExpress(source);
+    }
+
+    if (source[0].type === 'MultiplicationExpress') {
+      return source[0];
+    } else {
+      throw new Error();
+    }
+  }
+</script>
